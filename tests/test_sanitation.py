@@ -15,7 +15,74 @@ def test_check_data_contents_empty():
     df_empty = pd.DataFrame()
     
     assert check_data_contents(df_empty) == False
+
+def test_reformat_sample_names():
+    df = pd.DataFrame(
+        {
+            'sample_name': [
+                'Gregory ',
+                'Low  Control',
+                ' Med Control',
+                'testone!',
+                'hi<'
+            ]
+        }
+    )
+    expected_df = pd.DataFrame(
+        {
+            'sample_name': [
+                'gregory',
+                'low control',
+                'med control',
+                'testone',
+                'hi'
+            ]
+        }
+    )
+    pd.testing.assert_frame_equal(reformat_sample_names(df), expected_df)
+
+def test_reformat_data_body():
+    df = pd.DataFrame(
+        {
+            'sample_name': [
+                'patient 1',
+                'patient 2',
+                'patient 3',
+                'patient 4',
+                'patient 5',
+                'patient 6',
+                'patient 7',
+                'patient 8',
+                'patient 9',
+                'patient 10'
+            ],
+            'analyte_1':["< 0" ,""," N/A","Na","NA"," 23.4 ","45.6!","no root","#100","$200"],
+            'analyte_2':["0" ,"90", 90,"90","NA"," 23.4 ","45.6!","no root","#100","$200"]
+        }
+    )
     
+    expected_df = pd.DataFrame(
+        {
+            'sample_name': [
+                'patient 1',
+                'patient 2',
+                'patient 3',
+                'patient 4',
+                'patient 5',
+                'patient 6',
+                'patient 7',
+                'patient 8',
+                'patient 9',
+                'patient 10'
+            ],
+            'analyte_1': [0.0, np.nan, 0.0, 0.0, 0.0, 23.4, 45.6, "Invalid", 100.0, 200.0],
+            'analyte_2': [0.0, 90.0, 90, 90.0, 0.0, 23.4, 45.6, "Invalid", 100.0, 200.0]
+        }
+    )
+    result_df = reformat_data_body(df)
+    pd.testing.assert_frame_equal(result_df, expected_df)
+    return
+
 def test_check_levels_present_exist():
     df = pd.DataFrame(
         {
