@@ -1,0 +1,4 @@
+{
+    "config1": {"header": 0, "skip_rows": 0},
+    "config2": {"header": 2, "skip_rows": 1}
+}

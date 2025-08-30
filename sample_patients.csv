@@ -1,0 +1,33 @@
+sample_name,analyte_1,analyte_2,analyte_3,analyte_4
+Standard 1,10,10,10,10
+Standard 2,50,50,50,50
+Standard 3,200,200,200,200
+Standard 4,500,500,500,500
+Standard 5,1000,1000,1000,1000
+Standard 6,2500,2500,2500,2500
+BLANK CONTROL,0,0,0,0
+BLANK CONTROL,,0,0,0
+BLANK CONTROL,0,0,0,0
+BLANK CONTROL,0,0,0,0
+Patient 1,N/A,,63,24
+Patient 2,no root,95,73,33
+Patient 3,82,NA,63,75
+Patient 4,18,< 0,49,46
+Patient 5,96,88,19,87
+Patient 6,80,73,<0,15
+Patient 7,34,33,84,13
+Patient 8,36,87,53,25
+Patient 9,82,59,91,73
+Patient 10,40,64,97,48
+C1,20,20,20,20
+Patient 11,62,19,21,55
+Patient 12,95,79,88,19
+Patient 13,11,43,23,65
+Patient 14,40,78,76,77
+Patient 15,56,33,65,47
+Patient 16,63,35,11,49
+Patient 17,34,36,69,69
+Patient 18,57,37,63,95
+Patient 19,85,12,18,94
+Patient 20,93,81,74,15
+C2,500,500,500,500
