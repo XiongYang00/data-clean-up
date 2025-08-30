@@ -41,6 +41,122 @@ def test_reformat_sample_names():
     )
     pd.testing.assert_frame_equal(reformat_sample_names(df), expected_df)
 
+
+def test_remove_extra_space_data_body():
+    df = pd.DataFrame(
+        {
+            'sample_name': [
+                'patient 1',
+                'patient 2',
+                'patient 3',
+            ],
+            'analyte_1': [
+                " NA",
+                "N A",
+                " 20"
+            ]
+            
+        }
+    )
+    
+    expected_df  = pd.DataFrame(
+        {
+            'sample_name': [
+                'patient 1',
+                'patient 2',
+                'patient 3',
+            ],
+            'analyte_1': [
+                "NA",
+                "NA",
+                "20"
+            ]
+        }
+    )
+    pd.testing.assert_frame_equal(remove_extra_space_data_body(df, ['analyte_1']), expected_df)
+
+def test_remove_string_na_data_body():
+    df = pd.DataFrame(
+        {
+            'sample_name': [
+                'patient 1',
+                'patient 2',
+                'patient 3',
+                'patient 4',
+                'patient 5',
+            ],
+            'analyte_1': [
+                "N/A",
+                "NA",
+                "na",
+                "Na",
+                "nA"
+            ]
+        }
+    )
+    expected_df = pd.DataFrame(
+        {
+            'sample_name': [
+                'patient 1',
+                'patient 2',
+                'patient 3',
+                'patient 4',
+                'patient 5',
+            ],
+            'analyte_1': [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    )
+    pd.testing.assert_frame_equal(remove_string_na_data_body(df, ['analyte_1']),expected_df)
+    
+def test_remove_special_characters_data_body():
+
+    df = pd.DataFrame(
+        {
+            'sample_name': [
+                'patient!1',
+                'patient@2',
+                'patient#3',
+            ],
+            'analyte_1': [
+                "10$%^&*()_+",
+                "10{}[]:;\"'<,>?/\\|~`",
+                "20"
+            ]
+        }
+    )
+    expected_df = pd.DataFrame(
+        {
+            'sample_name': [
+                'patient!1',
+                'patient@2',
+                'patient#3',
+            ],
+            'analyte_1': [
+                "10",
+                "10",
+                "20"
+            ]
+        }
+    )
+    pd.testing.assert_frame_equal(remove_special_characters_data_body(df,['analyte_1']), expected_df)
+
+def test_remove_empty_strings_data_body():
+    
+    pass
+def test_replace_no_root_data_body():
+    
+    pass
+
+def test_convert_to_numeric_data_body():
+    
+    pass
+
 def test_reformat_data_body():
     df = pd.DataFrame(
         {
@@ -56,8 +172,8 @@ def test_reformat_data_body():
                 'patient 9',
                 'patient 10'
             ],
-            'analyte_1':["< 0" ,""," N/A","Na","NA"," 23.4 ","45.6!","no root","#100","$200"],
-            'analyte_2':["0" ,"90", 90,"90","NA"," 23.4 ","45.6!","no root","#100","$200"]
+            'analyte_1':["< 0" ,""," N/A","Na","NA"," 23.4 ","45.6!","noroot","#100","$200"],
+            'analyte_2':["0" ,"90", 90,"90","NA"," 23.4 ","45.6!","noroot","#100","$200"]
         }
     )
     

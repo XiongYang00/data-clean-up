@@ -1,13 +1,15 @@
-# file_io.py
-import csv
-from src.utils.csv_configs import CSV_CONFIGS
+import pandas as pd
+import os
 
-def parse_csv(file_path, config_name):
-    config = CSV_CONFIGS[config_name]
-    with open(file_path, newline='', encoding='utf-8') as f:
-        reader = csv.reader(f, delimiter=config["delimiter"])
-        for _ in range(config["header"]):
-            next(reader)
-        columns = next(reader)  # Read header row
-        data = [dict(zip(columns, row)) for row in reader]
-    return data
+def export_dataframe_to_csv(df: pd.DataFrame, file_path: str = None, index: bool = False):
+    """
+    Export a pandas DataFrame to a CSV file.
+
+    Args:
+        df (pd.DataFrame): DataFrame to export.
+        file_path (str): Path to the output CSV file. If None, saves as 'output.csv' in current directory.
+        index (bool): Whether to write row names (index).
+    """
+    if file_path is None:
+        file_path = os.path.join(os.getcwd(), 'output.csv')
+    df.to_csv(file_path, index=index, encoding='utf-8')

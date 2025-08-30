@@ -4,3 +4,12 @@
 2025-08-30 01:34:09 - xyang - [sanitation] - [check_levels_present] - INFO - Checking if quality control levels are present in the data.
 2025-08-30 01:34:34 - xyang - [sanitation] - [check_data_contents] - INFO - DataFrame is not empty, okay to proceed.
 2025-08-30 01:34:34 - xyang - [sanitation] - [check_levels_present] - INFO - Checking if quality control levels are present in the data.
+2025-08-30 11:15:00 - xyang - [sanitation] - [check_data_contents] - INFO - DataFrame is not empty, okay to proceed.
+2025-08-30 11:17:02 - xyang - [sanitation] - [check_data_contents] - INFO - DataFrame is not empty, okay to proceed.
+2025-08-30 11:17:49 - xyang - [sanitation] - [check_data_contents] - INFO - DataFrame is not empty, okay to proceed.
+2025-08-30 11:18:47 - xyang - [sanitation] - [check_data_contents] - INFO - DataFrame is not empty, okay to proceed.
+2025-08-30 11:19:17 - xyang - [sanitation] - [check_data_contents] - INFO - DataFrame is not empty, okay to proceed.
+2025-08-30 13:01:51 - xyang - [sanitation] - [check_data_contents] - INFO - DataFrame is not empty, okay to proceed.
+2025-08-30 13:04:47 - xyang - [sanitation] - [check_data_contents] - INFO - DataFrame is not empty, okay to proceed.
+2025-08-30 13:07:46 - xyang - [sanitation] - [check_data_contents] - INFO - DataFrame is not empty, okay to proceed.
+2025-08-30 13:47:57 - xyang - [sanitation] - [check_data_contents] - INFO - DataFrame is not empty, okay to proceed.

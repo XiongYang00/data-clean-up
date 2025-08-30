@@ -40,24 +40,140 @@ def reformat_sample_names(data: pd.DataFrame) -> pd.DataFrame:
     
     return data
 
-def reformat_data_body(data: pd.DataFrame) -> pd.DataFrame:
-    """_Clean the table body_"""
-    cols = data.columns[1:]
+def remove_extra_space_data_body(df: pd.DataFrame, cols: list) -> pd.DataFrame:
+    """
+    Remove all whitespace characters (spaces, tabs, etc.) from each cell in the specified columns of the dataframe.
+
+    Example:
+
+        Input:
+            | sample_name  | analyte_1 | analyte_2 |
+            |--------------|-----------|-----------|
+            | gregory      |  < 0      | 0         |
+            | low control  |           | 90        |
+            | med control  |  N/A      | 90        |
+            | testone      | N A       | 90        |
+            | hi           | NA        | NA        |
+
+        Output:
+            | sample_name  | analyte_1 | analyte_2 |
+            |--------------|-----------|-----------|
+            | gregory      | <0        | 0         |
+            | low control  |           | 90        |
+            | med control  | N/A       | 90        |
+            | testone      | NA        | 90        |
+            | hi           | NA        | NA        |
+    """
     # Strip whitespace
     for col in cols:
-        data[col] = data[col].map(lambda x: str(x).strip() if pd.notnull(x) else x)
-    # Remove special characters
+        df[col] = df[col].map(lambda x: str(x).replace(' ', '') if pd.notnull(x) else x)
+    return df
+
+def remove_string_na_data_body(df: pd.DataFrame, cols: list) -> pd.DataFrame:
+    """_Remove variations of literal "NA" from the dataframe._
+    
+    Example table:
+    
+        | Input      | Output     |
+        |------------|------------|
+        |"N/A"       | 0.0        |
+        |"NA"        | 0.0        |
+        |"na"        | 0.0        |
+        |"Na"        | 0.0        |
+        |"nA"        | 0.0        |
+        |"something" | "something"|
+        
+    Returns:
+    
+    _data frame will have NA values replaced with 0.0 type float._
+    """
+    # Replace N/A, NA, na, Na (case-insensitive, with or without spaces) with numeric 0.0
     for col in cols:
-        data[col] = data[col].map(lambda x: re.sub(r'[^\w\s.-]', '', str(x)) if pd.notnull(x) else x)
-    # Replace empty strings with np.nan
-    data[cols] = data[cols].replace('', np.nan)
-    # Replace N/A, NA, na, Na with 0
-    data[cols] = data[cols].replace(r'(?i)^(N/A|NA|na|Na)$', 0, regex=True)
+        df[col] = df[col].map(lambda x: 0.0 if (pd.notnull(x) and isinstance(x, str) and re.match(r'(?i)^\s*(N/A|NA|na|Na|nA)\s*$', x)) else x)
+    # Remove special characters
+    return df
+
+def remove_special_characters_data_body(df: pd.DataFrame, cols: list) -> pd.DataFrame:
+    r"""
+    Remove special characters from the data body, including underscores.
+
+    List of special characters removed:
+        ! @ $ % ^ & * ( ) _ + = { } [ ] : ; " ' < , > ? / \| ~ ` #
+
+    Example:
+
+    Input:
+    +--------------+------------------------+
+    | sample_name  | analyte_1              |
+    +--------------+------------------------+
+    | patient!1    | 10$%^&*()_+            |
+    | patient@2    | 10{}[]:;"'<,>?/\|~`    |
+    | patient#3    | 20                     |
+    +--------------+------------------------+
+
+    Output:
+    +--------------+-----------+
+    | sample_name  | analyte_1 |
+    +--------------+-----------+
+    | patient1     | 10        |
+    | patient2     | 10        |
+    | patient3     | 20        |
+    +--------------+-----------+
+    """
+    for col in cols:
+        df[col] = df[col].map(lambda x: re.sub(r'[^\da-zA-Z\s.-]', '', str(x)) if pd.notnull(x) else x)
+    
+    return df
+
+def remove_empty_strings_data_body(df: pd.DataFrame, cols: list) -> pd.DataFrame:
+    """_Convert all actual NaN (empty cells) to empty string._
+    """
+    # Replace empty strings (after cleaning) with np.nan
+    for col in cols:
+        df[col] = df[col].map(lambda x: np.nan if (pd.notnull(x) and (x == '' or x is None)) else x)    
+    
+    return df
+
+def replace_no_root_data_body(df: pd.DataFrame, cols: list) -> pd.DataFrame:
+    """_Replace all 'no root' values with 'Invalid'
+    """
     # Replace no root with 'Invalid'
-    data[cols] = data[cols].replace(r'(?i)^no root$', 'Invalid', regex=True)
+    df[cols] = df[cols].replace(r'(?i)^noroot$', 'Invalid', regex=True)
+    
+    return df
+
+def convert_to_numeric_data_body(df: pd.DataFrame, cols: list) -> pd.DataFrame:
+    """_Force all values into numeric (float) format for consistency._
+    
+    """
     # Convert numeric columns to float, leave 'Invalid' as string
     for col in cols:
-        data[col] = data[col].map(lambda x: float(x) if (pd.notnull(x) and x != 'Invalid') else x)
+        df[col] = df[col].map(lambda x: float(x) if (pd.notnull(x) and x != 'Invalid') else x)
+
+    return df
+
+def reformat_data_body(data: pd.DataFrame) -> pd.DataFrame:
+    """_Clean the table body._
+    
+   `Version 001:`
+    
+    Steps:
+    
+    1. Trim all existing whitespaces.
+    2. Convert all existing variations of 'na' into 0 values.
+    3. Remove all special characters.
+    4. Replace all empty values with empty strings.
+    5. Replace all 'no root' values with 'Invalid'.
+    6. Convert all remaining values to numeric, force all errors to NaN.
+    """
+    cols = data.columns[1:]
+    data = remove_extra_space_data_body(data, cols)
+    data = remove_string_na_data_body(data, cols)
+    data = remove_special_characters_data_body(data, cols)
+    data = remove_empty_strings_data_body(data, cols)
+    data = replace_no_root_data_body(data, cols)
+    data = convert_to_numeric_data_body(data, cols)
+    
     return data
 
 def check_levels_present(data: pd.DataFrame) -> list:
