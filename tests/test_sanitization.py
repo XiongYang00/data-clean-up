@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 import pytest
 import pandas as pd
-from src.utils.sanitation import *
+from src.utils.sanitization import *
 
 
 def test_check_data_contents_exist():
@@ -94,6 +94,7 @@ def test_remove_string_na_data_body():
             ]
         }
     )
+    
     expected_df = pd.DataFrame(
         {
             'sample_name': [
@@ -112,6 +113,7 @@ def test_remove_string_na_data_body():
             ]
         }
     )
+    
     pd.testing.assert_frame_equal(remove_string_na_data_body(df, ['analyte_1']),expected_df)
     
 def test_remove_special_characters_data_body():
@@ -147,15 +149,104 @@ def test_remove_special_characters_data_body():
     pd.testing.assert_frame_equal(remove_special_characters_data_body(df,['analyte_1']), expected_df)
 
 def test_remove_empty_strings_data_body():
+
+    df = pd.DataFrame(
+        {
+            'sample_name': [
+                'patient 1',
+                'patient 2',
+                'patient 3',
+            ],
+            'analyte_1': [
+                "",
+                "",
+                ""
+            ]
+        }
+    )
+
+    expected_df = pd.DataFrame(
+        {
+            'sample_name': [
+                'patient 1',
+                'patient 2',
+                'patient 3',
+            ],
+            'analyte_1': [
+                np.nan,
+                np.nan,
+                np.nan
+            ]
+        }
+    )
+
+    pd.testing.assert_frame_equal(remove_empty_strings_data_body(df,['analyte_1']),expected_df)
     
-    pass
 def test_replace_no_root_data_body():
+    df = pd.DataFrame(
+        {
+            'sample_name': [
+                'patient!1',
+                'patient@2',
+                'patient#3',
+            ],
+            'analyte_1': [
+                "noroot",
+                "noroot",
+                "noroot"
+            ]
+        }
+    )
     
-    pass
+    expected_df = pd.DataFrame(
+        {
+            'sample_name': [
+                'patient!1',
+                'patient@2',
+                'patient#3',
+            ],
+            'analyte_1': [
+                "Invalid",
+                "Invalid",
+                "Invalid"
+            ]
+        }
+    )    
+    
+    pd.testing.assert_frame_equal(replace_no_root_data_body(df, ['analyte_1']),expected_df)
 
 def test_convert_to_numeric_data_body():
+    df = pd.DataFrame(
+        {
+            'sample_name': [
+                'patient!1',
+                'patient@2',
+                'patient#3',
+            ],
+            'analyte_1': [
+                10,
+                "10",
+                "Invalid"
+            ]
+        }
+    )
     
-    pass
+    expected_df = pd.DataFrame(
+        {
+            'sample_name': [
+                'patient!1',
+                'patient@2',
+                'patient#3',
+            ],
+            'analyte_1': [
+                10.0,
+                10.0,
+                "Invalid"
+            ]
+        }
+    )
+
+    pd.testing.assert_frame_equal(convert_to_numeric_data_body(df,['analyte_1']),expected_df)
 
 def test_reformat_data_body():
     df = pd.DataFrame(
@@ -195,9 +286,10 @@ def test_reformat_data_body():
             'analyte_2': [0.0, 90.0, 90, 90.0, 0.0, 23.4, 45.6, "Invalid", 100.0, 200.0]
         }
     )
+    
     result_df = reformat_data_body(df)
+    
     pd.testing.assert_frame_equal(result_df, expected_df)
-    return
 
 def test_check_levels_present_exist():
     df = pd.DataFrame(
@@ -205,11 +297,17 @@ def test_check_levels_present_exist():
             'sample_name': [
                 'C1',
                 'C2',
-                'C3'
+                'C3',
+                '109238910',
+                '123123993',
+                '2131445523',
+                'C1',
+                '13412345'
             ]
         }
     )
-    assert check_levels_present(df) == ['C1','C2','C3']
+    
+    assert check_levels_present(df) == ['C1','C2','C3','C1']
 
 def test_check_levels_present_empty():
     df = pd.DataFrame(
@@ -221,4 +319,5 @@ def test_check_levels_present_empty():
             ]
         }
     )
+    
     assert check_levels_present(df) == []

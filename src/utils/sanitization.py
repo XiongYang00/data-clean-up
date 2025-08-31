@@ -126,11 +126,10 @@ def remove_special_characters_data_body(df: pd.DataFrame, cols: list) -> pd.Data
     return df
 
 def remove_empty_strings_data_body(df: pd.DataFrame, cols: list) -> pd.DataFrame:
-    """_Convert all actual NaN (empty cells) to empty string._
-    """
+    """Convert all empty strings and None values to NaN (missing value)."""
     # Replace empty strings (after cleaning) with np.nan
     for col in cols:
-        df[col] = df[col].map(lambda x: np.nan if (pd.notnull(x) and (x == '' or x is None)) else x)    
+        df[col] = df[col].map(lambda x: np.nan if (x == "" or x is None) else x)   
     
     return df
 
@@ -178,8 +177,6 @@ def reformat_data_body(data: pd.DataFrame) -> pd.DataFrame:
 
 def check_levels_present(data: pd.DataFrame) -> list:
     """_Look for anything that may resemble a control within the sequence._  
-    Args:
-        data (pd.DataFrame): _DataFrame containing 'sample_name' column._
 
     Match detection:
     - "C[1-3]", 'Low Control', "Medium Control", "High Control", 
@@ -187,9 +184,6 @@ def check_levels_present(data: pd.DataFrame) -> list:
     - NC1, NC2, NC3, PG1, PG2, PG3, CUTOFF G1, CUTOFF G2, CUTOFF G3,
     - Negative Control, Blank control
     - "UTAK", "UTAK control"
-    
-    Returns:
-        list: _a list of samples that match potential control material._
     
     """
     logger.info("Checking if quality control levels are present in the data.")
@@ -199,6 +193,23 @@ def check_levels_present(data: pd.DataFrame) -> list:
     return [match.group() for match in matches if match]
 
 def check_number_of_specimen(data: pd.DataFrame) -> list:
+    """_Return the list of non-control like rows._
+    
+    """
+    logger.info("Checking number of specimens in the data.")
+    mismatches=[]
+    # regular expression to check all of those levels, case insensitive.
+    pattern = r"(?i)(C[1-3]|Low Control|Medium Control|High Control|Med Control|VISCON|Dil con|DIL CON|Dilution control|NC[1-3]|PG[1-3]|CUTOFF G[1-3]|Negative Control|Blank control|UTAK|UTAK control)"
+    # find all that do not match the pattern.
+    mismatches = [item for item in data['sample_name'] if not re.search(pattern, str(item))]
+    
+    return mismatches
+
+def check_number_of_specimen(data: pd.DataFrame) -> list:
+    """_Return the list of non-control like rows._
+
+    """
+    logger.info("Checking number of specimens in the data.")
 
     return []
 

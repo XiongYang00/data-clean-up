@@ -1,0 +1,10 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+*.csv
+__pycache__/
+**/__pycache__/
+unit_test_results/
+unit_test_results/**
+src/utils/__pycache__/*.pyc
+log/
+log/**
+
