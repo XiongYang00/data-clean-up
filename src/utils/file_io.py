@@ -1,6 +1,20 @@
 import pandas as pd
 import os
 
+
+# input
+def import_dataframe_from_csv(file_path:str = None) -> pd.DataFrame:
+    """
+    """
+    if file_path is None:
+        df = pd.read_csv(os.path.join(os.getcwd(), "sample_patients.csv"), keep_default_na=False)
+    else:
+        df = pd.read_csv(file_path, keep_default_na=False)
+
+    return df
+
+
+# output
 def export_dataframe_to_csv(df: pd.DataFrame, file_path: str = None, index: bool = False):
     """
     Export a pandas DataFrame to a CSV file.

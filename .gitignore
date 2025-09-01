@@ -7,4 +7,5 @@ unit_test_results/**
 src/utils/__pycache__/*.pyc
 log/
 log/**
-
+comparison_reports/
+*.xlsx
