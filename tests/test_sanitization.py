@@ -3,8 +3,8 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 import pytest
 import pandas as pd
+import numpy as np
 from src.utils.sanitization import *
-
 
 def test_check_data_contents_exist():
     df_not_empty = pd.DataFrame({'sample_name':['C1','C2','C3']})
@@ -43,17 +43,18 @@ def test_reformat_sample_names():
 
 
 def test_remove_extra_space_data_body():
+    # Test data with various spacing issues - only analyte_1 should be cleaned
     df = pd.DataFrame(
         {
             'sample_name': [
-                'patient 1',
-                'patient 2',
-                'patient 3',
+                '  patient 1  ',  # This should NOT be cleaned
+                'patient  2',    # This should NOT be cleaned
+                '  patient 3',   # This should NOT be cleaned
             ],
             'analyte_1': [
-                " NA",
-                "N A",
-                " 20"
+                " NA ",
+                "N  A",
+                " 20 "
             ]
             
         }
@@ -62,9 +63,9 @@ def test_remove_extra_space_data_body():
     expected_df  = pd.DataFrame(
         {
             'sample_name': [
-                'patient 1',
-                'patient 2',
-                'patient 3',
+                '  patient 1  ',  # Unchanged because not in cols list
+                'patient  2',     # Unchanged because not in cols list
+                '  patient 3',    # Unchanged because not in cols list
             ],
             'analyte_1': [
                 "NA",
@@ -321,3 +322,71 @@ def test_check_levels_present_empty():
     )
     
     assert check_levels_present(df) == []
+
+# Edge case tests
+def test_empty_dataframe_handling():
+    """Test that functions handle empty DataFrames gracefully"""
+    empty_df = pd.DataFrame()
+    
+    # Test functions that should handle empty DataFrames
+    assert check_data_contents(empty_df) == False
+    
+    # Note: reformat_sample_names requires 'sample_name' column to exist
+    # so we test with a DataFrame that has the required column but no rows
+    empty_with_columns = pd.DataFrame(columns=['sample_name'])
+    result = reformat_sample_names(empty_with_columns)
+    assert result.empty
+    
+def test_single_row_dataframe():
+    """Test functions with single row DataFrames"""
+    single_row_df = pd.DataFrame({'sample_name': ['TEST PATIENT!'], 'analyte_1': ['10.5']})
+    
+    result = reformat_sample_names(single_row_df)
+    expected = pd.DataFrame({'sample_name': ['test patient'], 'analyte_1': ['10.5']})
+    pd.testing.assert_frame_equal(result, expected)
+
+def test_missing_columns():
+    """Test functions with missing expected columns"""
+    df_no_sample_name = pd.DataFrame({'other_col': ['value1', 'value2']})
+    
+    # This will raise a KeyError - the function doesn't handle missing columns gracefully
+    # Let's test that the error is raised as expected
+    with pytest.raises(KeyError):
+        reformat_sample_names(df_no_sample_name)
+
+def test_mixed_data_types():
+    """Test functions with mixed data types"""
+    mixed_df = pd.DataFrame({
+        'sample_name': ['patient 1', 'patient 2'],
+        'analyte_1': [123, 'abc'],  # Mixed numeric and string
+        'analyte_2': [np.nan, '']   # Mixed NaN and empty string
+    })
+    
+    # Test that remove_empty_strings_data_body handles mixed types
+    result = remove_empty_strings_data_body(mixed_df, ['analyte_2'])
+    assert pd.isna(result.loc[1, 'analyte_2'])  # Empty string should become NaN
+
+def test_very_large_strings():
+    """Test functions with very large string values"""
+    large_string = 'x' * 1000  # 1000 character string
+    df = pd.DataFrame({
+        'sample_name': ['patient 1'],
+        'analyte_1': [large_string + '!!!']
+    })
+    
+    result = remove_special_characters_data_body(df, ['analyte_1'])
+    assert result.loc[0, 'analyte_1'] == large_string
+
+def test_unicode_and_special_encoding():
+    """Test functions with Unicode characters"""
+    unicode_df = pd.DataFrame({
+        'sample_name': ['patïent 1', 'patieñt 2'],
+        'analyte_1': ['tëst', 'tést']
+    })
+    
+    result = reformat_sample_names(unicode_df)
+    expected = pd.DataFrame({
+        'sample_name': ['patïent 1', 'patieñt 2'],
+        'analyte_1': ['tëst', 'tést']
+    })
+    pd.testing.assert_frame_equal(result, expected)
